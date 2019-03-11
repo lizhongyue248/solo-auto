@@ -113,8 +113,13 @@ public enum Constant {
     return COMMAND_CHANGE_DIR_LINUX.value + path + command;
   }
 
+  /**
+   * 判断是否为 windows
+   *
+   * @return 是否是 windows
+   */
   public static boolean isWindows() {
-    return "windows".equalsIgnoreCase(System.getProperty("os.name"));
+    return System.getProperty("os.name").toLowerCase().contains("windows");
   }
 
 }
