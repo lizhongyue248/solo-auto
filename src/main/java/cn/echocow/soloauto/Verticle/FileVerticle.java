@@ -53,7 +53,7 @@ public class FileVerticle extends AbstractVerticle {
     webClient = WebClient.create(vertx, options);
     consumer.handler(message -> {
       JsonObject body = message.body();
-      LOGGER.info("1.New version is " + body.getString(NAME));
+      LOGGER.info("1. New version is " + body.getString(NAME));
       newVersionFileName = body.getString(NAME);
       update(message, body);
     });
@@ -65,12 +65,12 @@ public class FileVerticle extends AbstractVerticle {
       .timeout(Duration.ofSeconds(Integer.parseInt(solo.get(ConfigInfo.TIME_OUT.getValue()))).toMillis())
       .send(download -> {
         if (download.succeeded()) {
-          LOGGER.info("2.Get new version successed");
+          LOGGER.info("2. Get new version successed");
           @Nullable Buffer buffer = download.result().bodyAsBuffer();
           createFileDir();
           fileSystem.writeFile(newVersionPath(), buffer, result -> {
             if (result.succeeded()) {
-              LOGGER.info("3.Download new version " + newVersionPath() + " succeeded!");
+              LOGGER.info("3. Download new version " + newVersionPath() + " succeeded!");
               WarUtils.unwar(newVersionPath(), fileDir());
               moveOtherFiles();
               Future<Void> copyLocal = Future.future();
@@ -113,7 +113,7 @@ public class FileVerticle extends AbstractVerticle {
     }
     LOGGER.info("-. Kill last solo succeeded!");
     if (ExecuteCommand.commandRun(startCommand())) {
-      LOGGER.info("4.Success ! The old version " + lastVersionDir() + " to new version " + fileDir());
+      LOGGER.info("4. Success ! The old version " + lastVersionDir() + " to new version " + fileDir());
       return true;
     }
     return false;

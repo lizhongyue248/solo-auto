@@ -55,6 +55,7 @@ public class ExecuteCommand {
      * @return 执行结果
      */
     private static boolean commandRun(String command) {
+      LOGGER.info("-. Exec command: " + command);
       String[] cmd = {"-c", command};
       CommandLine convertCmd = new CommandLine("/bin/sh");
       convertCmd.addArguments(cmd, false);
