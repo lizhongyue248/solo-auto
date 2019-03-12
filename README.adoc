@@ -1,31 +1,93 @@
-= Soloauto
+= Solo-auto
 
 image:https://img.shields.io/badge/vert.x-3.6.3-purple.svg[link="https://vertx.io"]
 
-This application was generated using http://start.vertx.io
+solo 博客独立部署方式自动检测更新。
 
-== Building
+*目前仅支持 linux 版本*
 
-To launch your tests:
+== 使用
+
+获取最新版本的 https://github.com/lizhongyue248/solo-auto/releases[release]
+
+=== 配置
+
+> 注意，你的配置将会完全覆盖默认配置！
+
+[cols="1,1,1,2", options="header"]
+.config.json
+|===
+|属性名 | 类型 | 默认值 | 描述
+
+| latestUrl
+| String
+| https://api.github.com/repos/b3log/solo/releases/latest
+| 最新版本 solo 的 github restful 接口地址
+
+| homeDir
+| String
+| /root/
+| 解压后的文件夹路径，结尾必须有文件分隔符 /
+
+| interval
+| Number
+| 6
+| 几小时检测一次
+
+| version
+| String
+| v3.1.0
+| 当前已经部署的版本号
+
+| timeOut
+| Number
+| 30
+| Event Bus 等待时间
+
+| otherFiles
+| Array
+| ["favicon.ico", favicon.png"]
+| 其他的需要移动的文件名称
+
+| startCommand
+| Stirng
+| ``;nohup java -cp WEB-INF/lib/*:WEB-INF/classes org.b3log.solo.Starter >/dev/null 2>&1 &``
+| 启动命令，前面必须加英文符分号 ``;``
+|===
+
+
+=== 运行
+
+> 请注意：只能以 root 身份运行，否则可能会出现权限问题无法执行命令的情况。
+
+``java -jar soloauto-1.0.0-SNAPSHOT-fat.jar -conf 你的配置文件路径.json``
+
+=== 其它
+
+> 请注意：只能以 root 身份运行，否则可能会出现权限问题无法执行命令的情况。
+
+运行在指定端口请修改 `startCommand`
+
+```
+;nohup java -cp "WEB-INF/lib/*:WEB-INF/classes" org.b3log.solo.Starter -lp 端口号 >/dev/null 2>&1 &
+```
+
+== 构建
+
+测试:
 ```
 ./mvnw clean test
 ```
 
-To package your application:
+打包
 ```
 ./mvnw clean package
 ```
 
-To run your application:
+运行
 ```
 ./mvnw clean exec:java
 ```
 
-== Help
-
-* https://vertx.io/docs/[Vert.x Documentation]
-* https://stackoverflow.com/questions/tagged/vert.x?sort=newest&pageSize=15[Vert.x Stack Overflow]
-* https://groups.google.com/forum/?fromgroups#!forum/vertx[Vert.x User Group]
-* https://gitter.im/eclipse-vertx/vertx-users[Vert.x Gitter]
 
 
