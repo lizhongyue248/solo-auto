@@ -4,7 +4,16 @@ image:https://img.shields.io/badge/vert.x-3.6.3-purple.svg[link="https://vertx.i
 
 solo 博客独立部署方式自动检测更新。
 
-*目前仅支持 linux 版本*
+功能：自动检测版本，自动下载更新，自动解压，自动复制配置文件以及其他的文件。**目前仅支持 linux 版本。**
+
+== 在这之前
+
+- 请检查 `pkill -9 -f org.b3log.solo.Starter` 命令是否能够杀死你的 `solo` 进程。
+- 建议您先备份数据库以及配置文件，虽然不对数据库进行任何操作，但是定时备份是好习惯。
+- 为避免不必要的欧乌，请务必使用 `root` 用户运行。
+- 仅支持系统命令，不能使用别名定义的命令。
+- 仅支持独立部署。
+- 仅支持 linux。
 
 == 使用
 
@@ -27,17 +36,17 @@ solo 博客独立部署方式自动检测更新。
 | homeDir
 | String
 | /root/
-| 解压后的文件夹路径，结尾必须有文件分隔符 /
+| 解压后的文件夹路径，结尾必须有文件分隔符 `/`，当前版本以及新版本都会存放在此目录
 
 | interval
 | Number
 | 6
-| 几小时检测一次
+| 几小时检测一次版本更新
 
 | version
 | String
-| v3.1.0
-| 当前已经部署的版本号
+| v3.2.0
+| 当前已经部署的版本号，格式必须与 github 上相同
 
 | timeOut
 | Number
@@ -58,19 +67,78 @@ solo 博客独立部署方式自动检测更新。
 
 === 运行
 
-> 请注意：只能以 root 身份运行，否则可能会出现权限问题无法执行命令的情况。
+> 请注意：建议以 root 身份运行，否则可能会出现权限问题无法执行命令的情况。
 
-``java -jar soloauto-1.0.0-SNAPSHOT-fat.jar -conf 你的配置文件路径.json``
+- 前台运行，假设配置文件与 `jar` 包位于同一目录且名称为 `solo-auto.json`
+
+``java -jar soloauto-1.0.0-SNAPSHOT-fat.jar -conf solo-auto.json``
+
+- 后台运行，假设配置文件与 `jar` 包位于同一目录且名称为 `solo-auto.json`
+
+`nohup java -jar soloauto-1.0.0-SNAPSHOT-fat.jar -conf solo-auto.json >/dev/null 2>&1 &`
 
 === 其它
 
-> 请注意：只能以 root 身份运行，否则可能会出现权限问题无法执行命令的情况。
+> *请注意：建议以 root 身份运行，否则可能会出现权限问题无法执行命令的情况。*
 
-运行在指定端口请修改 `startCommand`
+> 为什么会写这个？
 
+从 `V2.8.0` 开始用 `solo`，至今到了 `V3.2.0`，以前除了部署应用的时候上一下服务器，其他时候都用不上，`hexo` 这些博客基本很少更新。现在每次更新都要上去重复一边操作，实在太麻烦了。
+
+> 为什么不用 `docker`？
+
+服务器资源有限，除了 `solo` 还运行者其他的应用，运行 `docker` 就会有一些资源被占用，并且想自己 `DIY` 部分主题比较麻烦，每次都要进服务器，再进容器里面改，为了运行 `solo` 直接上 `docker` 觉得没必要。如果后面还有应用使用 `docker` 会换，或者 D 大说的会重写 `Docker` 镜像构建的时候可能会换。
+
+> 为什么不用 `tomcat`？
+
+`tomcat` 跑着其它应用，没做负载均衡，并且担心访问速度，所以直接用 `独立容器 + nginx` 部署了。
+
+== 示例
+
+1. 运行在指定端口：请修改 `startCommand`, **前面一定要加分号 `;`**
+
+```json
+{
+  "startCommand":";nohup java -cp 'WEB-INF/lib/*:WEB-INF/classes' org.b3log.solo.Starter -lp 8765 >/dev/null 2>&1 &"
+}
 ```
-;nohup java -cp "WEB-INF/lib/*:WEB-INF/classes" org.b3log.solo.Starter -lp 端口号 >/dev/null 2>&1 &
+
+2. 复制其它文件：请修改 `otherFiles`
+```json
+{
+  "homeDir": "/root/",  // 解压后的文件夹路径，结尾必须有文件分隔符，当前版本以及新版本都会存放在此目录
+  "version": "v3.2.0",  // 当前已经启动且部署好的 solo 版本
+  "otherFiles": [       // 其它需要复制的文件
+    "favicon.ico",
+    "favicon.png",
+    "background.jpg"
+  ]
+}
 ```
+
+== 说明
+
+使用 vertx 事件驱动，使用 `Event Bus` 点对点消息模式，`MainVerticle` 获取默认配置，再获取用户配置以覆盖默认配置。然后分别部署两个 `Verticle`。
+
+- `WebClientVerticle` 定时检测版本
+- `FileVerticle` 处理文件下载、移动操作
+
+---
+
+0. `WebClientVerticle` 检测当前最新版是否与配置中的版本匹配，如果不匹配，携带请求的部分信息通知 `FileVerticle`。
+1. `FileVerticle` 使用类名注册一个处理器以接受请求，收到通知以后，获取最新版本。
+2. 下载最新版本的 `war` 包，解压，然后移动用户自定义的文件（配置文件中 `otherFiles`）。
+3. 移动 `solo` 配置文件：`local.properties`，`latke.properties`，`solo.properties`.
+4. 复制完毕后，使用 `pkill -9 -f org.b3log.solo.Starter` 杀死以前的 `solo` 进程，
+5. 使用 `cd 解压后的路径;nohup java -cp WEB-INF/lib/*:WEB-INF/classes org.b3log.solo.Starter >/dev/null 2>&1 &` 命令启动 `solo`，后面的启动命令用户可以自定义，**请注意：自定义启动命令前请务必加上分号！**
+6. `FileVerticle` 执行完毕，回复 `WebClientVerticle` ，`WebClientVerticle` 收到回复日志记录。
+
+== 未来
+
+0. 有需要会考虑写 `tomcat` 方式的，但是目前没有写 `windows` 的打算。
+1. 打算加入邮件或者短信通知，以能够更好的感知博客更新变化。
+2. 考虑是否加入 `web` 页面，但是觉得没必要。
+3. 想过做成 `solo` 插件，但是文档太少，并且感觉局限性比较大且自己水平有限，所以放弃了。
 
 == 构建
 
