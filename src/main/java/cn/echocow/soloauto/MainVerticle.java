@@ -8,6 +8,7 @@ import io.vertx.config.ConfigRetriever;
 import io.vertx.config.ConfigRetrieverOptions;
 import io.vertx.config.ConfigStoreOptions;
 import io.vertx.core.*;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
@@ -32,29 +33,31 @@ public class MainVerticle extends AbstractVerticle {
     ConfigStoreOptions fileStore = new ConfigStoreOptions()
       .setType("file")
       .setConfig(new JsonObject().put("path", "config.json"));
-    ConfigRetrieverOptions options = new ConfigRetrieverOptions()
-      .addStore(fileStore);
+    ConfigRetrieverOptions options = new ConfigRetrieverOptions().addStore(fileStore);
     ConfigRetriever retriever = ConfigRetriever.create(vertx, options);
-
     retriever.getConfig(ar -> {
       if (ar.succeeded()) {
         fileConfig.mergeIn(ar.result());
         shareDate();
         Future<String> webClientFuture = Future.future();
         Future<String> fileFuture = Future.future();
+        fileConfig.stream().forEach(entity -> LOGGER.info("Read default configuration : " + entity.getKey() + " —— " + entity.getValue()));
+        config().stream().forEach(entity -> LOGGER.info("Read your configuration : " + entity.getKey() + " —— " + entity.getValue()));
+        LOGGER.info("Your configuration will override the default configuration");
         vertx.deployVerticle(WebClientVerticle.class.getName(), webDeploymentOptions(), webClientFuture.completer());
         vertx.deployVerticle(FileVerticle.class.getName(), fileDeploymentOptions(), fileFuture.completer());
         CompositeFuture.all(webClientFuture, fileFuture).setHandler(res -> {
           if (res.succeeded()) {
             LOGGER.info("All Verticle deploy succeeded!");
+            startFuture.complete();
           } else {
             LOGGER.info("Some Verticle deploy failed!" + res.cause().getMessage());
-            vertx.close();
+            startFuture.fail(res.cause());
           }
         });
       } else {
         LOGGER.error("The configuration file: config.json does not exist or in wrong format, start failed!");
-        vertx.close();
+        startFuture.fail(ar.cause());
       }
     });
   }
@@ -76,9 +79,9 @@ public class MainVerticle extends AbstractVerticle {
    */
   private DeploymentOptions fileDeploymentOptions() {
     return new DeploymentOptions().setConfig(new JsonObject()
-      .put(ConfigInfo.HOME_DIR.getValue(), config().getString(ConfigInfo.HOME_DIR.getValue(), fileConfig.getString(ConfigInfo.HOME_DIR.getValue())))
-      .put(ConfigInfo.OTHER_FILES.getValue(), config().getJsonArray(ConfigInfo.OTHER_FILES.getValue(), fileConfig.getJsonArray(ConfigInfo.OTHER_FILES.getValue())))
-      .put(ConfigInfo.START_COMMAND.getValue(), config().getString(ConfigInfo.START_COMMAND.getValue(), fileConfig.getString(ConfigInfo.START_COMMAND.getValue()))));
+      .put(ConfigInfo.HOME_DIR.getValue(), config().getString(ConfigInfo.HOME_DIR.getValue(), fileConfig.getString(ConfigInfo.HOME_DIR.getValue(), Constant.DEFAULT_HOME_DIR_LINUX.getValue())))
+      .put(ConfigInfo.OTHER_FILES.getValue(), config().getJsonArray(ConfigInfo.OTHER_FILES.getValue(), fileConfig.getJsonArray(ConfigInfo.OTHER_FILES.getValue(), new JsonArray())))
+      .put(ConfigInfo.START_COMMAND.getValue(), config().getString(ConfigInfo.START_COMMAND.getValue(), fileConfig.getString(ConfigInfo.START_COMMAND.getValue(), null))));
   }
 
   /**
@@ -90,5 +93,4 @@ public class MainVerticle extends AbstractVerticle {
     solo.put(ConfigInfo.INTERVAL.getValue(), config().getLong(ConfigInfo.INTERVAL.getValue(), fileConfig.getLong(ConfigInfo.INTERVAL.getValue())).toString());
     solo.put(ConfigInfo.TIME_OUT.getValue(), config().getInteger(ConfigInfo.TIME_OUT.getValue(), fileConfig.getInteger(ConfigInfo.TIME_OUT.getValue())).toString());
   }
-
 }

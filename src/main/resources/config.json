@@ -1,12 +1,11 @@
 {
   "latestUrl": "https://api.github.com/repos/b3log/solo/releases/latest",
-  "homeDir": "/home/echo/Documents/",
+  "homeDir": "/root/",
   "interval": 6,
   "version": "v3.1.0",
   "timeOut": 30,
   "otherFiles": [
     "favicon.ico",
-    "favicon.png",
-    "bg.jpeg"
+    "favicon.png"
   ]
 }

@@ -2,7 +2,6 @@ package cn.echocow.soloauto.Verticle;
 
 import cn.echocow.soloauto.util.ConfigInfo;
 import cn.echocow.soloauto.util.Constant;
-import com.sun.istack.internal.Nullable;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.json.JsonObject;
@@ -14,7 +13,9 @@ import io.vertx.ext.web.client.HttpResponse;
 import io.vertx.ext.web.client.WebClient;
 import io.vertx.ext.web.codec.BodyCodec;
 
+import javax.annotation.Nullable;
 import java.time.Duration;
+import java.util.Objects;
 
 /**
  * 版本检查
@@ -33,12 +34,14 @@ public class WebClientVerticle extends AbstractVerticle {
     SharedData sd = vertx.sharedData();
     solo = sd.getLocalMap(Constant.SOLO.getValue());
     webClient = WebClient.create(vertx);
-//    vertx.setPeriodic(1000, handle -> {
     check();
-//    });
-
+    vertx.setPeriodic(Duration.ofHours(Integer.parseInt(solo.get(ConfigInfo.INTERVAL.getValue()))).toMillis(), handle -> check());
   }
 
+
+  /**
+   * 检查更新
+   */
   private void check() {
     String url = config().getString(ConfigInfo.LATEST_URL.getValue(), "https://api.github.com/repos/b3log/solo/releases/latest");
     webClient.getAbs(url)
@@ -47,7 +50,8 @@ public class WebClientVerticle extends AbstractVerticle {
         if (ar.succeeded()) {
           HttpResponse<JsonObject> response = ar.result();
           @Nullable JsonObject body = response.body();
-          if (!solo.get(ConfigInfo.VERSION.getValue()).equalsIgnoreCase(body.getString(Constant.TAG_NAME.getValue()))) {
+          if (!solo.get(ConfigInfo.VERSION.getValue()).equalsIgnoreCase(
+            Objects.requireNonNull(body).getString(Constant.TAG_NAME.getValue()))) {
             LOGGER.info("0. Has new version...");
             sendMessage(body);
           } else {
@@ -60,6 +64,11 @@ public class WebClientVerticle extends AbstractVerticle {
       });
   }
 
+  /**
+   * EventBus
+   *
+   * @param body 数据
+   */
   private void sendMessage(JsonObject body) {
     vertx.eventBus().<JsonObject>send(FileVerticle.class.getName(),
       body.getJsonArray("assets").getJsonObject(0).put(Constant.TAG_NAME.getValue(), body.getString(Constant.TAG_NAME.getValue())),
@@ -69,7 +78,7 @@ public class WebClientVerticle extends AbstractVerticle {
         if (asyncResult.succeeded() && asyncResult.result().body().getInteger("code") == 1) {
           LOGGER.info("Update succeeded!");
         } else {
-          LOGGER.error("Update failed!", asyncResult.cause());
+          LOGGER.error("Message get error. Please check your network! The reason for this error may be that it takes more time to download new version file.", asyncResult.cause());
         }
       });
   }

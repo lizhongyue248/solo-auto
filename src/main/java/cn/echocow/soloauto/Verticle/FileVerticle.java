@@ -4,7 +4,6 @@ import cn.echocow.soloauto.util.ConfigInfo;
 import cn.echocow.soloauto.util.Constant;
 import cn.echocow.soloauto.util.ExecuteCommand;
 import cn.echocow.soloauto.util.WarUtils;
-import com.sun.istack.internal.Nullable;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.CompositeFuture;
@@ -22,6 +21,7 @@ import io.vertx.core.shareddata.SharedData;
 import io.vertx.ext.web.client.WebClient;
 import io.vertx.ext.web.client.WebClientOptions;
 
+import javax.annotation.Nullable;
 import java.io.File;
 import java.time.Duration;
 
@@ -159,7 +159,7 @@ public class FileVerticle extends AbstractVerticle {
    * @return home 路径
    */
   private String homeDir() {
-    return config().getString(ConfigInfo.HOME_DIR.getValue(), Constant.DEFAULT_HOME_DIR_LINUX.getValue());
+    return config().getString(ConfigInfo.HOME_DIR.getValue());
   }
 
   /**
