@@ -77,7 +77,7 @@ public enum Constant {
    * @param command 命令
    * @return 结果
    */
-  public String startSolo(String path, String command) {
+  public static String startSolo(String path, String command) {
     if (isWindows()) {
       return startSoloWindows(path, command);
     } else {
@@ -92,7 +92,7 @@ public enum Constant {
    * @param command 命令
    * @return 结果
    */
-  private String startSoloWindows(String path, String command) {
+  private static String startSoloWindows(String path, String command) {
     if (command == null) {
       command = COMMAND_START_SOLO_WINDOWS.value;
     }
@@ -106,7 +106,7 @@ public enum Constant {
    * @param command 命令
    * @return 结果
    */
-  private String startSoloLinux(String path, String command) {
+  private static String startSoloLinux(String path, String command) {
     if (command == null) {
       command = COMMAND_START_SOLO_LINUX.value;
     }

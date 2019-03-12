@@ -37,13 +37,12 @@ public class MainVerticle extends AbstractVerticle {
     ConfigRetriever retriever = ConfigRetriever.create(vertx, options);
     retriever.getConfig(ar -> {
       if (ar.succeeded()) {
-        fileConfig.mergeIn(ar.result());
+        fileConfig = ar.result().mergeIn(config());
         shareDate();
+        fileConfig.stream().forEach(entity -> LOGGER.info("Read configuration : " + entity.getKey() + " —— " + entity.getValue()));
+        LOGGER.info("Tip. Your configuration will override the default configuration");
         Future<String> webClientFuture = Future.future();
         Future<String> fileFuture = Future.future();
-        fileConfig.stream().forEach(entity -> LOGGER.info("Read default configuration : " + entity.getKey() + " —— " + entity.getValue()));
-        config().stream().forEach(entity -> LOGGER.info("Read your configuration : " + entity.getKey() + " —— " + entity.getValue()));
-        LOGGER.info("Your configuration will override the default configuration");
         vertx.deployVerticle(WebClientVerticle.class.getName(), webDeploymentOptions(), webClientFuture.completer());
         vertx.deployVerticle(FileVerticle.class.getName(), fileDeploymentOptions(), fileFuture.completer());
         CompositeFuture.all(webClientFuture, fileFuture).setHandler(res -> {
@@ -79,9 +78,9 @@ public class MainVerticle extends AbstractVerticle {
    */
   private DeploymentOptions fileDeploymentOptions() {
     return new DeploymentOptions().setConfig(new JsonObject()
-      .put(ConfigInfo.HOME_DIR.getValue(), config().getString(ConfigInfo.HOME_DIR.getValue(), fileConfig.getString(ConfigInfo.HOME_DIR.getValue(), Constant.DEFAULT_HOME_DIR_LINUX.getValue())))
-      .put(ConfigInfo.OTHER_FILES.getValue(), config().getJsonArray(ConfigInfo.OTHER_FILES.getValue(), fileConfig.getJsonArray(ConfigInfo.OTHER_FILES.getValue(), new JsonArray())))
-      .put(ConfigInfo.START_COMMAND.getValue(), config().getString(ConfigInfo.START_COMMAND.getValue(), fileConfig.getString(ConfigInfo.START_COMMAND.getValue(), null))));
+      .put(ConfigInfo.HOME_DIR.getValue(), fileConfig.getString(ConfigInfo.HOME_DIR.getValue(), Constant.DEFAULT_HOME_DIR_LINUX.getValue()))
+      .put(ConfigInfo.OTHER_FILES.getValue(), fileConfig.getJsonArray(ConfigInfo.OTHER_FILES.getValue(), new JsonArray()))
+      .put(ConfigInfo.START_COMMAND.getValue(), fileConfig.getString(ConfigInfo.START_COMMAND.getValue(), null)));
   }
 
   /**
@@ -89,8 +88,8 @@ public class MainVerticle extends AbstractVerticle {
    */
   private void shareDate() {
     LocalMap<String, String> solo = vertx.sharedData().getLocalMap(Constant.SOLO.getValue());
-    solo.put(ConfigInfo.VERSION.getValue(), config().getString(ConfigInfo.VERSION.getValue(), fileConfig.getString(ConfigInfo.VERSION.getValue())));
-    solo.put(ConfigInfo.INTERVAL.getValue(), config().getLong(ConfigInfo.INTERVAL.getValue(), fileConfig.getLong(ConfigInfo.INTERVAL.getValue())).toString());
-    solo.put(ConfigInfo.TIME_OUT.getValue(), config().getInteger(ConfigInfo.TIME_OUT.getValue(), fileConfig.getInteger(ConfigInfo.TIME_OUT.getValue())).toString());
+    solo.put(ConfigInfo.VERSION.getValue(), fileConfig.getString(ConfigInfo.VERSION.getValue()));
+    solo.put(ConfigInfo.INTERVAL.getValue(), fileConfig.getInteger(ConfigInfo.INTERVAL.getValue()).toString());
+    solo.put(ConfigInfo.TIME_OUT.getValue(), fileConfig.getInteger(ConfigInfo.TIME_OUT.getValue()).toString());
   }
 }

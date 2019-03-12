@@ -81,7 +81,7 @@ class TestVerticle {
   @Timeout(value = 15, timeUnit = TimeUnit.SECONDS)
   void killSoloTest(Vertx vertx, VertxTestContext testContext) {
 //    WarUtils.unwar("/home/echo/Documents/solo-v3.2.0/solo-v3.2.0.war", "/home/echo/Documents/solo-v3.2.0/123");
-    assertTrue(ExecuteCommand.killSolo());
+//    assertTrue(ExecuteCommand.killSolo());
     testContext.completeNow();
   }
 

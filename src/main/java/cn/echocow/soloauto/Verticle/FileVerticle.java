@@ -150,7 +150,7 @@ public class FileVerticle extends AbstractVerticle {
    * @return 命令
    */
   private String startCommand() {
-    return Constant.COMMAND_START_SOLO_LINUX.startSolo(fileDir(), config().getString(ConfigInfo.START_COMMAND.getValue(), null));
+    return Constant.startSolo(fileDir(), config().getString(ConfigInfo.START_COMMAND.getValue(), null));
   }
 
   /**
