@@ -25,7 +25,8 @@ public class MainVerticle extends AbstractVerticle {
 
   public static void main(String[] args) {
     JsonObject config = new JsonObject();
-    config.put("deploy", "tomcat")
+    // 测试传入配置
+    config.put("deploy", "solo")
       .put("homeDir", "/home/echo/Other/apache-tomcat-9.0.16/webapps/")
       .put("tomcatDir", "solo")
       .put("version", "v3.1.0");
@@ -90,6 +91,11 @@ public class MainVerticle extends AbstractVerticle {
     String startCommand = fileConfig.getString(ConfigInfo.START_COMMAND.getValue(), null);
     if (startCommand != null && !startCommand.startsWith(";")) {
       startCommand = ";" + startCommand;
+    }
+    if (Constant.isTomcat(fileConfig.getString(ConfigInfo.DEPLOY.getValue()))) {
+      LOGGER.info("Deploy method: Tomcat");
+    } else {
+      LOGGER.info("Deploy method: Solo");
     }
     return new DeploymentOptions().setConfig(new JsonObject()
       .put(ConfigInfo.HOME_DIR.getValue(), homeDir)
