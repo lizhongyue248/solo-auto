@@ -96,7 +96,8 @@ public class MainVerticle extends AbstractVerticle {
       .put(ConfigInfo.START_COMMAND.getValue(), startCommand)
       .put(ConfigInfo.OTHER_FILES.getValue(), fileConfig.getJsonArray(ConfigInfo.OTHER_FILES.getValue()))
       .put(ConfigInfo.DEPLOY.getValue(), fileConfig.getString(ConfigInfo.DEPLOY.getValue()))
-      .put(ConfigInfo.TOMCAT_DIR.getValue(), fileConfig.getString(ConfigInfo.TOMCAT_DIR.getValue())));
+      .put(ConfigInfo.TOMCAT_DIR.getValue(), fileConfig.getString(ConfigInfo.TOMCAT_DIR.getValue()))
+      .put(ConfigInfo.DEBUG.getValue(), fileConfig.getBoolean(ConfigInfo.DEBUG.getValue())));
   }
 
   /**
@@ -107,6 +108,5 @@ public class MainVerticle extends AbstractVerticle {
     solo.put(ConfigInfo.VERSION.getValue(), fileConfig.getString(ConfigInfo.VERSION.getValue()));
     solo.put(ConfigInfo.INTERVAL.getValue(), fileConfig.getInteger(ConfigInfo.INTERVAL.getValue()).toString());
     solo.put(ConfigInfo.TIME_OUT.getValue(), fileConfig.getInteger(ConfigInfo.TIME_OUT.getValue()).toString());
-    solo.put(ConfigInfo.DEBUG.getValue(), fileConfig.getBoolean(ConfigInfo.DEBUG.getValue()).toString());
   }
 }

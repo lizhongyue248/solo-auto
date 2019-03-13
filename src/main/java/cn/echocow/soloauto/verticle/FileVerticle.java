@@ -131,6 +131,7 @@ public class FileVerticle extends AbstractVerticle {
   }
 
   /**
+   * 独立部署 处理器
    * 执行 杀死 —— 启动
    *
    * @return 执行结果
@@ -255,6 +256,9 @@ public class FileVerticle extends AbstractVerticle {
     asyncResult.cause().printStackTrace();
   }
 
+  /**
+   * 输出 debug 信息
+   */
   private void debugInfo() {
     debug("startCommand —— " + startCommand());
     debug("homeDir —— " + homeDir());
@@ -270,7 +274,7 @@ public class FileVerticle extends AbstractVerticle {
    * @param message 信息
    */
   private void debug(String message) {
-    if (Boolean.parseBoolean(solo.get(ConfigInfo.DEBUG.getValue()))) {
+    if (config().getBoolean(ConfigInfo.DEBUG.getValue())) {
       LOGGER.info("Debug: " + message);
     }
   }

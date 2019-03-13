@@ -6,7 +6,7 @@
   "interval": 6,
   "version": "v3.2.0",
   "timeOut": 30,
-  "debug": true,
+  "debug": false,
   "otherFiles": [
     "favicon.ico",
     "favicon.png"
