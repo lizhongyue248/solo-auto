@@ -8,12 +8,24 @@ solo 博客独立部署方式自动检测更新。
 
 == 在这之前
 
-- 请检查 `pkill -9 -f org.b3log.solo.Starter` 命令是否能够杀死你的 `solo` 进程。
+- 仅支持独立部署、`tomcat` 部署 `linux` 系统。
 - 建议您先备份数据库以及配置文件，虽然不对数据库进行任何操作，但是定时备份是好习惯。
 - 为避免不必要的错误，请务必使用 `root` 用户运行。
-- 仅支持系统命令，不能使用别名定义的命令。
-- 仅支持独立部署。
-- 仅支持 linux。
+- 独立部署仅支持系统命令，不能使用别名定义的命令。
+- 独立部署请检查 `pkill -9 -f org.b3log.solo.Starter` 命令是否能够杀死你的 `solo` 进程。
+
+== 更新记录
+
+=== 2019-3-18  v1.1.0-SNAPSHOT
+
+- 添加 `tomcat` 部署方式自动检测更新
+- 现 `homeDir` 末尾可以不添加文件分隔符 `/`
+- 现 `startCommand` 开头可以不添加英文分号 `;`
+- 添加 `debug` 参数开启运行时的文件路径获取详情
+
+=== 2019-3-17  v1.0.0-SNAPSHOT
+
+- 独立模式部署
 
 == 使用
 
@@ -38,6 +50,16 @@ solo 博客独立部署方式自动检测更新。
 | /root/
 | 解压后的文件夹路径，结尾必须有文件分隔符 `/`，当前版本以及新版本都会存放在此目录
 
+| deploy
+| String
+| solo
+| 部署方式，可选 `tomcat`，其他值无效
+
+| tomcatDir
+| String
+| solo
+| `tomcat` 部署在 `webapps` 目录下的 `solo` 的文件名称
+
 | interval
 | Number
 | 6
@@ -58,6 +80,11 @@ solo 博客独立部署方式自动检测更新。
 | ["favicon.ico", favicon.png"]
 | 其他的需要移动的文件名称
 
+| debug
+| Boolean
+| false
+| 简单打印方法信息，方便排错
+
 | startCommand
 | Stirng
 | ``;nohup java -cp WEB-INF/lib/*:WEB-INF/classes org.b3log.solo.Starter >/dev/null 2>&1 &``
@@ -77,9 +104,32 @@ solo 博客独立部署方式自动检测更新。
 
 `nohup java -jar soloauto-1.0.0-SNAPSHOT-fat.jar -conf solo-auto.json >/dev/null 2>&1 &`
 
-=== 其它
+> 建议，先前台运行，检查控制台输出中的配置文件是否有配置错误，确认无误且不报错后，再后台运行。
 
-> *请注意：建议以 root 身份运行，否则可能会出现权限问题无法执行命令的情况。*
+=== 独立部署注意事项
+
+1. 正在运行的 `solo` 的文件夹的目录名称必须类似为 `solo-v3.1.0` 形式。
+2. 建议以 `root` 方式运行。
+
+=== tomcat 部署注意事项
+
+1. 请注意填写以下属性
+
+|===
+|属性 |注意
+
+| `homeDir`
+| `tomcat` 的 `webapps` 目录
+
+| `deploy`
+| `tomcat`
+
+| `tomcatDir`
+| `tomcat` 的 `webapps` 下的部署 `solo` 的文件夹名称
+|===
+
+
+=== 其它
 
 Q: 为什么会写这个？
 
@@ -91,9 +141,11 @@ A: 服务器资源有限，除了 `solo` 还运行者其他的应用，运行 `d
 
 Q: 为什么不用 `tomcat`？
 
-A: `tomcat` 跑着其它应用，没做负载均衡，并且担心访问速度，所以直接用 `独立容器 + nginx` 部署了。
+A: `tomcat` 跑着其它应用，没做负载均衡，并且担心访问速度，所以直接用 `独立容器 + nginx` 部署了。v1.1.0 版本已经可以使用tomcat
 
 == 示例
+
+=== 独立部署
 
 - 运行在指定端口：请修改 `startCommand`, **前面一定要加分号 `;`**
 
@@ -158,6 +210,24 @@ A: `tomcat` 跑着其它应用，没做负载均衡，并且担心访问速度�
 | 当前已经启动且部署好的 solo 版本
 |===
 
+=== tomcat 部署
+
+- 假设我现在已经部署好了 `solo`，并且路径为 `/home/echo/Other/apache-tomcat-9.0.16/webapps/solo`，配置文件如下：
+
+```json
+{
+  "homeDir": "/home/echo/Other/apache-tomcat-9.0.16/webapps/",
+  "deploy": "tomcat",
+  "tomcatDir": "solo",
+  "version": "v3.2.0",
+  "otherFiles": [
+    "favicon.ico",
+    "favicon.png",
+    "background.jpg"
+  ]
+}
+```
+其中 `deploy` 和 `tomcatDir` 必填
 
 == 说明
 
@@ -168,6 +238,8 @@ A: `tomcat` 跑着其它应用，没做负载均衡，并且担心访问速度�
 
 ---
 
+=== 独立部署
+
 0. `WebClientVerticle` 检测当前最新版是否与配置中的版本匹配，如果不匹配，携带请求的部分信息通知 `FileVerticle`。
 1. `FileVerticle` 使用类名注册一个处理器以接受请求，收到通知以后，获取最新版本。
 2. 下载最新版本的 `war` 包，解压，然后移动用户自定义的文件（配置文件中 `otherFiles`）。
@@ -176,9 +248,18 @@ A: `tomcat` 跑着其它应用，没做负载均衡，并且担心访问速度�
 5. 使用 `cd 解压后的路径;nohup java -cp WEB-INF/lib/*:WEB-INF/classes org.b3log.solo.Starter >/dev/null 2>&1 &` 命令启动 `solo`，后面的启动命令用户可以自定义，**请注意：自定义启动命令前请务必加上分号！**
 6. `FileVerticle` 执行完毕，回复 `WebClientVerticle` ，`WebClientVerticle` 收到回复日志记录。
 
+=== tomcat
+
+这个过程不会重启 tomcat。
+
+- 0-3 同上
+- 修改原来版本的 `solo` 的文件夹名称为 `tomcatDir配置的名称+当前时间`
+- 修改新下载的 `solo` 的文件夹名称为 `tomcatDir` 所配置的参数
+- `FileVerticle` 执行完毕，回复 `WebClientVerticle` ，`WebClientVerticle` 收到回复日志记录。
+
 == 未来
 
-0. 有需要会考虑写 `tomcat` 方式的，但是目前没有写 `windows` 的打算。
+0. 目前没有写 `windows` 的打算。
 1. 打算加入邮件或者短信通知，以能够更好的感知博客更新变化。
 2. 考虑是否加入 `web` 页面，但是觉得没必要。
 3. 想过做成 `solo` 插件，但是文档太少，并且感觉局限性比较大且自己水平有限，所以放弃了。
