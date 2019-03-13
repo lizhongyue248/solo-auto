@@ -41,17 +41,17 @@ public enum Constant {
    */
   BROWSER_DOWNLOAD_URL("browser_download_url"),
   /**
-   * 默认家目录
-   */
-  DEFAULT_HOME_DIR_LINUX("/root/"),
-  /**
    * solo
    */
   SOLO("solo"),
   /**
    * 版本名称
    */
-  TAG_NAME("tag_name");
+  TAG_NAME("tag_name"),
+  /**
+   * tomcat 部署方式
+   */
+  DEPLOY_TOMCAT("tomcat");
 
   private String value;
 
@@ -68,6 +68,16 @@ public enum Constant {
 
   public String getValue() {
     return this.value;
+  }
+
+  /**
+   * 是否是 tomcat 部署方式
+   *
+   * @param deploy 部署方式
+   * @return 结果
+   */
+  public static boolean isTomcat(String deploy){
+    return DEPLOY_TOMCAT.value.equalsIgnoreCase(deploy);
   }
 
   /**

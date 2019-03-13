@@ -1,9 +1,12 @@
 {
   "latestUrl": "https://api.github.com/repos/b3log/solo/releases/latest",
   "homeDir": "/root/",
+  "deploy": "solo",
+  "tomcatDir": "solo",
   "interval": 6,
   "version": "v3.2.0",
   "timeOut": 30,
+  "debug": true,
   "otherFiles": [
     "favicon.ico",
     "favicon.png"

@@ -1,4 +1,4 @@
-package cn.echocow.soloauto.Verticle;
+package cn.echocow.soloauto.verticle;
 
 import cn.echocow.soloauto.util.ConfigInfo;
 import cn.echocow.soloauto.util.Constant;

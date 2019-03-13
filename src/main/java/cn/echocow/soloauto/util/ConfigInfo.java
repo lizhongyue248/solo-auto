@@ -11,6 +11,14 @@ public enum ConfigInfo {
    */
   HOME_DIR("homeDir"),
   /**
+   * 部署方式
+   */
+  DEPLOY("deploy"),
+  /**
+   * tomcat 下 solo 的名称
+   */
+  TOMCAT_DIR("tomcatDir"),
+  /**
    * 其它需要移动的文件
    */
   OTHER_FILES("otherFiles"),
@@ -30,6 +38,10 @@ public enum ConfigInfo {
    * 请求超时时间设置
    */
   TIME_OUT("timeOut"),
+  /**
+   * 请求超时时间设置
+   */
+  DEBUG("debug"),
   /**
    * 最新版本的下载路径
    */

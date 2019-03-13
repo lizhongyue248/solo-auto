@@ -1,4 +1,4 @@
-package cn.echocow.soloauto.Verticle;
+package cn.echocow.soloauto.verticle;
 
 import cn.echocow.soloauto.util.ConfigInfo;
 import cn.echocow.soloauto.util.Constant;
@@ -24,6 +24,7 @@ import io.vertx.ext.web.client.WebClientOptions;
 import javax.annotation.Nullable;
 import java.io.File;
 import java.time.Duration;
+import java.time.LocalDateTime;
 
 /**
  * 文件处理
@@ -51,6 +52,7 @@ public class FileVerticle extends AbstractVerticle {
     MessageConsumer<JsonObject> consumer = vertx.eventBus().consumer(FileVerticle.class.getName());
     fileSystem = vertx.fileSystem();
     webClient = WebClient.create(vertx, options);
+
     consumer.handler(message -> {
       JsonObject body = message.body();
       LOGGER.info("1. New version is " + body.getString(NAME));
@@ -68,30 +70,31 @@ public class FileVerticle extends AbstractVerticle {
           LOGGER.info("2. Get new version successed");
           @Nullable Buffer buffer = download.result().bodyAsBuffer();
           createFileDir();
-          fileSystem.writeFile(newVersionPath(), buffer, result -> {
+          fileSystem.writeFile(newVersionFilePath(), buffer, result -> {
             if (result.succeeded()) {
-              LOGGER.info("3. Download new version " + newVersionPath() + " succeeded!");
-              WarUtils.unwar(newVersionPath(), fileDir());
+              debugInfo();
+              LOGGER.info("3. Download new version " + newVersionFilePath() + " succeeded!");
+              WarUtils.unwar(newVersionFilePath(), newVersionDir());
               moveOtherFiles();
               Future<Void> copyLocal = Future.future();
               Future<Void> copyLatke = Future.future();
               Future<Void> copySolo = Future.future();
-              fileSystem.deleteBlocking(Constant.FILE_LOCAL.getFile(fileDir()));
-              fileSystem.deleteBlocking(Constant.FILE_LATKE.getFile(fileDir()));
-              fileSystem.deleteBlocking(Constant.FILE_SOLO.getFile(fileDir()));
-              fileSystem.copy(Constant.FILE_LOCAL.getFile(lastVersionDir()), Constant.FILE_LOCAL.getFile(fileDir()), copyLocal.completer());
-              fileSystem.copy(Constant.FILE_LATKE.getFile(lastVersionDir()), Constant.FILE_LATKE.getFile(fileDir()), copyLatke.completer());
-              fileSystem.copy(Constant.FILE_SOLO.getFile(lastVersionDir()), Constant.FILE_SOLO.getFile(fileDir()), copySolo.completer());
+              fileSystem.deleteBlocking(Constant.FILE_LOCAL.getFile(newVersionDir()));
+              fileSystem.deleteBlocking(Constant.FILE_LATKE.getFile(newVersionDir()));
+              fileSystem.deleteBlocking(Constant.FILE_SOLO.getFile(newVersionDir()));
+              fileSystem.copy(Constant.FILE_LOCAL.getFile(lastVersionDir()), Constant.FILE_LOCAL.getFile(newVersionDir()), copyLocal.completer());
+              fileSystem.copy(Constant.FILE_LATKE.getFile(lastVersionDir()), Constant.FILE_LATKE.getFile(newVersionDir()), copyLatke.completer());
+              fileSystem.copy(Constant.FILE_SOLO.getFile(lastVersionDir()), Constant.FILE_SOLO.getFile(newVersionDir()), copySolo.completer());
               CompositeFuture.all(copyLocal, copyLatke, copySolo).setHandler(ar -> {
-                if (ar.succeeded() && executeCommand()) {
+                if (ar.succeeded() && startSolo()) {
                   solo.put("version", body.getString(Constant.TAG_NAME.getValue()));
                   message.reply(new JsonObject().put("code", 1));
                 } else {
-                  errorHandle(ar, "Failed ! The old version " + lastVersionDir() + " to new version " + fileDir(), message);
+                  errorHandle(ar, "Failed ! The old version " + lastVersionDir() + " to new version " + newVersionDir(), message);
                 }
               });
             } else {
-              errorHandle(result, "Download new version " + newVersionPath() + " failed!", message);
+              errorHandle(result, "Download new version " + newVersionFilePath() + " failed!", message);
             }
           });
         } else {
@@ -102,18 +105,44 @@ public class FileVerticle extends AbstractVerticle {
   }
 
   /**
+   * 启动 solo
+   *
+   * @return 启动结果
+   */
+  private boolean startSolo() {
+    if (isTomcat()) {
+      return tomcatHandle();
+    } else {
+      return soloHandle();
+    }
+  }
+
+  /**
+   * tomcat 部署下处理器
+   *
+   * @return 处理结果
+   */
+  private boolean tomcatHandle() {
+    if (fileSystem.existsBlocking(lastVersionDir())) {
+      fileSystem.moveBlocking(lastVersionDir(), homeDir() + tomcatDir() + LocalDateTime.now());
+    }
+    fileSystem.moveBlocking(newVersionDir(), lastVersionDir());
+    return fileSystem.existsBlocking(lastVersionDir());
+  }
+
+  /**
    * 执行 杀死 —— 启动
    *
    * @return 执行结果
    */
-  private boolean executeCommand() {
+  private boolean soloHandle() {
     if (!ExecuteCommand.killSolo()) {
       LOGGER.error("E. Kill last solo failed!");
       return false;
     }
     LOGGER.info("-. Kill last solo succeeded!");
     if (ExecuteCommand.commandRun(startCommand())) {
-      LOGGER.info("4. Success ! The old version " + lastVersionDir() + " to new version " + fileDir());
+      LOGGER.info("4. Success ! The old version " + lastVersionDir() + " to new version " + newVersionDir());
       return true;
     }
     return false;
@@ -125,11 +154,11 @@ public class FileVerticle extends AbstractVerticle {
   private void moveOtherFiles() {
     config().getJsonArray(ConfigInfo.OTHER_FILES.getValue(), new JsonArray()).stream()
       .forEach(file -> {
-        if (fileSystem.existsBlocking(fileDir() + file)) {
-          fileSystem.deleteBlocking(fileDir() + file);
+        if (fileSystem.existsBlocking(newVersionDir() + file)) {
+          fileSystem.deleteBlocking(newVersionDir() + file);
         }
-        fileSystem.copyBlocking(lastVersionDir() + file, fileDir() + file);
-        LOGGER.info("-. Copy other file: " + lastVersionDir() + file + " to " + fileDir() + file);
+        fileSystem.copyBlocking(lastVersionDir() + file, newVersionDir() + file);
+        LOGGER.info("-. Copy other file: " + lastVersionDir() + file + " to " + newVersionDir() + file);
       });
   }
 
@@ -137,11 +166,11 @@ public class FileVerticle extends AbstractVerticle {
    * 创建文件路径, 阻塞
    */
   private void createFileDir() {
-    if (fileSystem.existsBlocking(fileDir())) {
-      fileSystem.deleteRecursiveBlocking(fileDir(), true);
-      LOGGER.info("-. Exist " + fileDir() + ", delete them success!");
+    if (fileSystem.existsBlocking(newVersionDir())) {
+      fileSystem.deleteRecursiveBlocking(newVersionDir(), true);
+      LOGGER.info("-. Exist " + newVersionDir() + ", delete them success!");
     }
-    fileSystem.mkdirsBlocking(fileDir());
+    fileSystem.mkdirsBlocking(newVersionDir());
   }
 
   /**
@@ -150,7 +179,7 @@ public class FileVerticle extends AbstractVerticle {
    * @return 命令
    */
   private String startCommand() {
-    return Constant.startSolo(fileDir(), config().getString(ConfigInfo.START_COMMAND.getValue(), null));
+    return Constant.startSolo(newVersionDir(), config().getString(ConfigInfo.START_COMMAND.getValue(), null));
   }
 
   /**
@@ -163,12 +192,36 @@ public class FileVerticle extends AbstractVerticle {
   }
 
   /**
+   * 获取 tomcat 下 solo 文件路径
+   *
+   * @return home 路径
+   */
+  private String tomcatDir() {
+    return config().getString(ConfigInfo.TOMCAT_DIR.getValue());
+  }
+
+  /**
    * 前一个版本文件路径
    *
    * @return 文件路径
    */
   private String lastVersionDir() {
-    return homeDir() + "solo-" + solo.get(ConfigInfo.VERSION.getValue()) + File.separator;
+    String fileName;
+    if (isTomcat()) {
+      fileName = tomcatDir();
+    } else {
+      fileName = "solo-" + solo.get(ConfigInfo.VERSION.getValue());
+    }
+    return homeDir() + fileName + File.separator;
+  }
+
+  /**
+   * 是否是 tomcat 方式部署
+   *
+   * @return 结果
+   */
+  private boolean isTomcat() {
+    return Constant.isTomcat(config().getString(ConfigInfo.DEPLOY.getValue()));
   }
 
   /**
@@ -176,16 +229,16 @@ public class FileVerticle extends AbstractVerticle {
    *
    * @return 文件
    */
-  private String newVersionPath() {
-    return fileDir() + File.separator + newVersionFileName;
+  private String newVersionFilePath() {
+    return newVersionDir() + File.separator + newVersionFileName;
   }
 
   /**
-   * 存放文件夹
+   * 新版本存放文件夹
    *
    * @return 文件夹
    */
-  private String fileDir() {
+  private String newVersionDir() {
     return homeDir() + newVersionFileName.substring(0, newVersionFileName.lastIndexOf(".")) + File.separator;
   }
 
@@ -200,5 +253,25 @@ public class FileVerticle extends AbstractVerticle {
     LOGGER.error("E: " + info + asyncResult.cause().getMessage());
     message.reply(new JsonObject().put("code", 0));
     asyncResult.cause().printStackTrace();
+  }
+
+  private void debugInfo() {
+    debug("startCommand —— " + startCommand());
+    debug("homeDir —— " + homeDir());
+    debug("tomcatDir —— " + tomcatDir());
+    debug("isTomcat —— " + isTomcat());
+    debug("newVersionDir —— " + newVersionDir());
+    debug("newVersionFilePath —— " + newVersionFilePath());
+  }
+
+  /**
+   * 随意处理下 debug 信息
+   *
+   * @param message 信息
+   */
+  private void debug(String message) {
+    if (Boolean.parseBoolean(solo.get(ConfigInfo.DEBUG.getValue()))) {
+      LOGGER.info("Debug: " + message);
+    }
   }
 }

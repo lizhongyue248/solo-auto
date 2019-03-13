@@ -82,6 +82,7 @@ class TestVerticle {
   void killSoloTest(Vertx vertx, VertxTestContext testContext) {
 //    WarUtils.unwar("/home/echo/Documents/solo-v3.2.0/solo-v3.2.0.war", "/home/echo/Documents/solo-v3.2.0/123");
 //    assertTrue(ExecuteCommand.killSolo());
+    vertx.fileSystem().moveBlocking("/home/echo/Data/work/soloauto/test","/home/echo/Data/work/soloauto/test1");
     testContext.completeNow();
   }
 
