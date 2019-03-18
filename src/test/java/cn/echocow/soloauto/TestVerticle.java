@@ -1,7 +1,6 @@
 package cn.echocow.soloauto;
 
-import cn.echocow.soloauto.util.ExecuteCommand;
-import io.vertx.codegen.annotations.Nullable;
+import com.sun.istack.internal.Nullable;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonObject;
@@ -20,6 +19,14 @@ import java.util.concurrent.TimeUnit;
 import static io.vertx.core.spi.resolver.ResolverProvider.DISABLE_DNS_RESOLVER_PROP_NAME;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+
+/**
+ * 测试类
+ *
+ * @author Echo
+ * @version 1.2
+ * @date 2019-03-18 10:39
+ */
 @ExtendWith(VertxExtension.class)
 class TestVerticle {
 

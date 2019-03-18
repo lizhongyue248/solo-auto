@@ -9,7 +9,7 @@ import java.time.ZoneId;
 
 /**
  * @author Echo
- * @version 1.0
+ * @version 1.2
  * @date 2019-03-13 09:01
  */
 class WarUtilsTest {
