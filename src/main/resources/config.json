@@ -3,12 +3,9 @@
   "homeDir": "/root/",
   "deploy": "solo",
   "tomcatDir": "solo",
-  "interval": 6,
-  "version": "v3.2.0",
+  "interval": 1,
+  "version": "v3.3.0",
   "timeOut": 30,
   "debug": false,
-  "otherFiles": [
-    "favicon.ico",
-    "favicon.png"
-  ]
+  "otherFiles": []
 }

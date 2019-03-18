@@ -17,22 +17,17 @@ import java.io.File;
 
 import static io.vertx.core.spi.resolver.ResolverProvider.DISABLE_DNS_RESOLVER_PROP_NAME;
 
+/**
+ * 主入口
+ *
+ * @author Echo
+ * @version 1.2
+ * @date 2019-03-18 10:39
+ */
 public class MainVerticle extends AbstractVerticle {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MainVerticle.class);
   private JsonObject fileConfig = new JsonObject();
-
-
-  public static void main(String[] args) {
-    JsonObject config = new JsonObject();
-    // 测试传入配置
-    config.put("deploy", "solo")
-      .put("homeDir", "/home/echo/Other/apache-tomcat-9.0.16/webapps/")
-      .put("tomcatDir", "solo")
-      .put("version", "v3.1.0");
-    Vertx vertx = Vertx.vertx();
-    vertx.deployVerticle(MainVerticle.class.getName(), new DeploymentOptions().setConfig(config));
-  }
 
   @Override
   public void start(Future<Void> startFuture) {

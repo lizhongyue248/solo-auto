@@ -4,7 +4,7 @@ import java.io.File;
 
 /**
  * @author Echo
- * @version 1.0
+ * @version 1.2
  * @date 2019-03-07 16:31
  */
 public enum Constant {

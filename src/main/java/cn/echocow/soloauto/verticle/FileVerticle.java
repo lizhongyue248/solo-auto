@@ -30,7 +30,7 @@ import java.time.LocalDateTime;
  * 文件处理
  *
  * @author Echo
- * @version 1.0
+ * @version 1.2
  * @date 2019-03-06 10:39
  */
 public class FileVerticle extends AbstractVerticle {

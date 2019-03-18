@@ -2,7 +2,7 @@ package cn.echocow.soloauto.util;
 
 /**
  * @author Echo
- * @version 1.0
+ * @version 1.2
  * @date 2019-03-11 15:11
  */
 public enum ConfigInfo {

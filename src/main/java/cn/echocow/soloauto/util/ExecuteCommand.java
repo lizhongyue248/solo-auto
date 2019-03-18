@@ -8,7 +8,7 @@ import org.apache.commons.exec.DefaultExecutor;
 
 /**
  * @author Echo
- * @version 1.0
+ * @version 1.2
  * @date 2019-03-06 13:50
  */
 public class ExecuteCommand {

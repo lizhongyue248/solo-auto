@@ -16,16 +16,7 @@ solo 博客独立部署方式自动检测更新。
 
 == 更新记录
 
-=== 2019-3-18  v1.1.0-SNAPSHOT
-
-- 添加 `tomcat` 部署方式自动检测更新
-- 现 `homeDir` 末尾可以不添加文件分隔符 `/`
-- 现 `startCommand` 开头可以不添加英文分号 `;`
-- 添加 `debug` 参数开启运行时的文件路径获取详情
-
-=== 2019-3-17  v1.0.0-SNAPSHOT
-
-- 独立模式部署
+https://github.com/lizhongyue248/solo-auto/wiki[wiki]
 
 == 使用
 

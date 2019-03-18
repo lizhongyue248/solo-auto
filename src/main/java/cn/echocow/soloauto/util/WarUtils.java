@@ -13,7 +13,7 @@ import java.io.*;
 
 /**
  * @author Echo
- * @version 1.0
+ * @version 1.2
  * @date 2019-03-07 14:53
  */
 public class WarUtils {

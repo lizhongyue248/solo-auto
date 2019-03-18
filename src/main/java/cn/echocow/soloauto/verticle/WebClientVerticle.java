@@ -21,7 +21,7 @@ import java.util.Objects;
  * 版本检查
  *
  * @author Echo
- * @version 1.0
+ * @version 1.2
  * @date 2019-03-06 10:39
  */
 public class WebClientVerticle extends AbstractVerticle {
@@ -73,7 +73,7 @@ public class WebClientVerticle extends AbstractVerticle {
     vertx.eventBus().<JsonObject>send(FileVerticle.class.getName(),
       body.getJsonArray("assets").getJsonObject(0).put(Constant.TAG_NAME.getValue(), body.getString(Constant.TAG_NAME.getValue())),
       new DeliveryOptions().setSendTimeout(
-        Duration.ofSeconds(Integer.parseInt(solo.get(ConfigInfo.TIME_OUT.getValue())) * 10).toMillis()),
+        Duration.ofSeconds(Integer.parseInt(solo.get(ConfigInfo.TIME_OUT.getValue())) * 1000).toMillis()),
       asyncResult -> {
         if (asyncResult.succeeded() && asyncResult.result().body().getInteger("code") == 1) {
           LOGGER.info("Update succeeded!");
