@@ -8,13 +8,13 @@ solo 博客独立部署方式自动检测更新。
 
 == 在这之前
 
-- 仅支持独立部署、`tomcat` 部署 `linux` 系统。
+- 仅支持 `linux` 系统下的 `独立部署`、`tomcat 部署` 。
 - 建议您先备份数据库以及配置文件，虽然不对数据库进行任何操作，但是定时备份是好习惯。
 - 为避免不必要的错误，请务必使用 `root` 用户运行。
 - 独立部署仅支持系统命令，不能使用别名定义的命令。
 - 独立部署请检查 `pkill -9 -f org.b3log.solo.Starter` 命令是否能够杀死你的 `solo` 进程。
 
-== 更新记录
+== 更新记录/使用记录/我的配置
 
 https://github.com/lizhongyue248/solo-auto/wiki[wiki]
 
@@ -68,7 +68,7 @@ https://github.com/lizhongyue248/solo-auto/wiki[wiki]
 
 | otherFiles
 | Array
-| ["favicon.ico", favicon.png"]
+| []
 | 其他的需要移动的文件名称
 
 | debug
