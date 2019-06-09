@@ -7,7 +7,6 @@ solo 博客独立部署方式自动检测更新。
 功能：自动检测版本，自动下载更新，自动解压，自动复制配置文件以及其他的文件。**目前仅支持 linux 版本。**
 
 > 配置在线生成地址： https://lizhongyue248.github.io/solo-auto-ui/[solo-auto-ui]
-
 == 在这之前
 
 - 仅支持 `linux` 系统下的 `独立部署`、`tomcat 部署` 。
@@ -25,6 +24,10 @@ https://github.com/lizhongyue248/solo-auto/wiki[wiki]
 获取最新版本的 https://github.com/lizhongyue248/solo-auto/releases[release]
 
 === 配置
+
+> 配置在线生成地址： https://lizhongyue248.github.io/solo-auto-ui/[solo-auto-ui]
+
+image::solo-auto-ui[https://resources.echocow.cn/solo/%E6%B7%B1%E5%BA%A6%E6%88%AA%E5%9B%BE_%E9%80%89%E6%8B%A9%E5%8C%BA%E5%9F%9F_20190609170931.png]
 
 > 注意，你的配置将会完全覆盖默认配置！
 
