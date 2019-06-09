@@ -28,7 +28,7 @@ https://github.com/lizhongyue248/solo-auto/wiki[wiki]
 
 > 配置在线生成地址： https://lizhongyue248.github.io/solo-auto-ui/[solo-auto-ui]
 
-image::solo-auto-ui[https://resources.echocow.cn/solo/%E6%B7%B1%E5%BA%A6%E6%88%AA%E5%9B%BE_%E9%80%89%E6%8B%A9%E5%8C%BA%E5%9F%9F_20190609170931.png]
+image::https://resources.echocow.cn/solo/%E6%B7%B1%E5%BA%A6%E6%88%AA%E5%9B%BE_%E9%80%89%E6%8B%A9%E5%8C%BA%E5%9F%9F_20190609170931.png[solo-auto-ui]
 
 > 注意，你的配置将会完全覆盖默认配置！
 
