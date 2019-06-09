@@ -6,7 +6,7 @@ solo 博客独立部署方式自动检测更新。
 
 功能：自动检测版本，自动下载更新，自动解压，自动复制配置文件以及其他的文件。**目前仅支持 linux 版本。**
 
-配置在线生成地址：[solo-auto-ui](https://lizhongyue248.github.io/solo-auto-ui/)
+> 配置在线生成地址： https://lizhongyue248.github.io/solo-auto-ui/[solo-auto-ui]
 
 == 在这之前
 
