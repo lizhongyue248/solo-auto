@@ -2,6 +2,9 @@
 
 image:https://img.shields.io/badge/vert.x-3.6.3-purple.svg[link="https://vertx.io"]
 
+> 由于 solo 不再支持 servlet 方式部署，此项目停止维护，建议使用 [solo-in-docker](https://github.com/liumapp/solo-in-docker?utm_source=hacpai.com), 参见 [Solo v3.6.7 发布，移除 Servlet 容器支持](https://hacpai.com/article/1573408539790)
+
+
 solo 博客独立部署方式自动检测更新。
 
 功能：自动检测版本，自动下载更新，自动解压，自动复制配置文件以及其他的文件。**目前仅支持 linux 版本。**
